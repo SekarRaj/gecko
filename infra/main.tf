@@ -2,52 +2,60 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "microfocus-rg" {
-  name     = "microfocus-rg"
+variable "prefix" {
+  default = "ibm"
+}
+
+locals {
+  vm_name = "${var.prefix}-vm"
+}
+
+resource "azurerm_resource_group" "ibm-rg" {
+  name     = "${var.prefix}-resources"
   location = "West Europe"
 }
 
-resource "azurerm_virtual_network" "microfocus_network" {
-  name                = "microfocus-network"
-  resource_group_name = azurerm_resource_group.microfocus-rg.name
-  location            = azurerm_resource_group.microfocus-rg.location
+resource "azurerm_virtual_network" "ibm_network" {
+  name                = "${var.prefix}-network"
+  resource_group_name = azurerm_resource_group.ibm-rg.name
+  location            = azurerm_resource_group.ibm-rg.location
   address_space       = ["10.0.0.0/16"]
 }
 
-resource "azurerm_subnet" "microfocus_subnet" {
+resource "azurerm_subnet" "ibm_subnet" {
   name                 = "internal"
-  resource_group_name  = azurerm_resource_group.microfocus-rg.name
-  virtual_network_name = azurerm_virtual_network.microfocus_network.name
+  resource_group_name  = azurerm_resource_group.ibm-rg.name
+  virtual_network_name = azurerm_virtual_network.ibm_network.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
-resource "azurerm_network_interface" "microfocus_nic" {
-  name                = "microfocus-nic"
-  location            = azurerm_resource_group.microfocus-rg.location
-  resource_group_name = azurerm_resource_group.microfocus-rg.name
+resource "azurerm_network_interface" "ibm_nic" {
+  name                = "ibm-nic"
+  location            = azurerm_resource_group.ibm-rg.location
+  resource_group_name = azurerm_resource_group.ibm-rg.name
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.microfocus_subnet.id
+    subnet_id                     = azurerm_subnet.ibm_subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.microfocus_ip.id
+    public_ip_address_id          = azurerm_public_ip.ibm_ip.id
   }
 }
 
-resource "azurerm_public_ip" "microfocus_ip" {
-  name                = "microfocus_ip"
-  location            = azurerm_resource_group.microfocus-rg.location
-  resource_group_name = azurerm_resource_group.microfocus-rg.name
+resource "azurerm_public_ip" "ibm_ip" {
+  name                = "ibm_ip"
+  location            = azurerm_resource_group.ibm-rg.location
+  resource_group_name = azurerm_resource_group.ibm-rg.name
   allocation_method   = "Static"
 }
 
-resource "azurerm_linux_virtual_machine" "microfocus-vm" {
-  name                  = "microfocus-vm"
-  resource_group_name   = azurerm_resource_group.microfocus-rg.name
-  location              = azurerm_resource_group.microfocus-rg.location
+resource "azurerm_linux_virtual_machine" "ibm-vm" {
+  name                  = "ibm-vm"
+  resource_group_name   = azurerm_resource_group.ibm-rg.name
+  location              = azurerm_resource_group.ibm-rg.location
   size                  = "Standard_F4s_v2"
   admin_username        = "adminuser"
-  network_interface_ids = [azurerm_network_interface.microfocus_nic.id]
+  network_interface_ids = [azurerm_network_interface.ibm_nic.id]
 
   admin_ssh_key {
     username   = "adminuser"
@@ -65,23 +73,30 @@ resource "azurerm_linux_virtual_machine" "microfocus-vm" {
       sku       = "20_04-lts-cvm"
       version   = "20.04.202402050"
   }
+}
 
-  # provisioner "local-exec" {
-  #   command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u adminuser ${local_file.ansible_playbook.filename}"
-  # }
+resource "azurerm_managed_disk" "ibm-managed-disk" {
+  name                 = "${local.vm_name}-disk1"
+  location             = azurerm_resource_group.ibm-rg.location
+  resource_group_name  = azurerm_resource_group.ibm-rg.name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = 10
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "example" {
+  managed_disk_id    = azurerm_managed_disk.ibm-managed-disk.id
+  virtual_machine_id = azurerm_virtual_machine.ibm-vm.id
+  lun                = "10"
+  caching            = "ReadWrite"
 }
 
 resource "local_file" "ansible_inventory" {
-  content  = azurerm_public_ip.microfocus_ip.ip_address
+  content  = azurerm_public_ip.ibm_ip.ip_address
   filename = "${path.module}/inventory.ini"
-  depends_on = [azurerm_linux_virtual_machine.microfocus-vm]
+  depends_on = [azurerm_linux_virtual_machine.ibm-vm]
 }
 
-# resource "local_file" "ansible_playbook" {
-#   content = templatefile("${path.module}/ibm_cobol_playbook.tpl", { vm_ip = azurerm_public_ip.microfocus_ip.ip_address })
-#   filename = "${path.module}/playbook.yml"
-# }
-
 output "public_ip" {
-  value = azurerm_public_ip.microfocus_ip.ip_address
+  value = azurerm_public_ip.ibm_ip.ip_address
 }
