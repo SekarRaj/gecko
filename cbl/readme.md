@@ -1,0 +1,1 @@
+cobc -x -free -O2 -Wall -std=gnu -I . EMDSQL.cbl -o hello

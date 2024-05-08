@@ -1,0 +1,82 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    # - name: Install gcc
+    #   apt:
+    #     name: gcc
+    #     state: present
+    #     update_cache: yes
+
+    # - name: Install glibc
+    #   apt:
+    #     name: libc6
+    #     state: present
+
+    # - name: Install glibc-devel
+    #   apt:
+    #     name: libc6-dev
+    #     state: present
+
+    # - name: Install libgcc_s1
+    #   apt:
+    #     name: libgcc1
+    #     state: present
+
+    # - name: Install libstdc++6
+    #   apt:
+    #     name: libstdc++6
+    #     state: present
+
+    # - name: Copy IBM COBOL installation files to remote server
+    #   copy:
+    #     src: /Users/rajrajar/vault/mainframe/IBM_COBOL_V1.2.0_LINUX_EVAL.x86-64.240110.tar.gz
+    #     dest: /tmp/ibm_cobol_installation_files.tar.gz
+
+    # - name: Extract IBM COBOL installation files
+    #   unarchive:
+    #     src: /tmp/ibm_cobol_installation_files.tar.gz
+    #     dest: /tmp
+    #     remote_src: yes
+    #     creates: /tmp/ibm_cobol_installation_files
+
+    # - name: Run IBM COBOL installation script
+    #   command:
+    #     cmd: /tmp/install
+        
+    # - name: Create symbolic link for cob2
+    #   file:
+    #     src: /opt/ibm/cobol/1.2.0/usr/bin/cob2
+    #     dest: /usr/bin/cob2
+    #     state: link
+
+    # - name: Create symbolic link for cob2.cfg
+    #   file:
+    #     src: /opt/ibm/cobol/1.2.0/etc/cob2.cfg
+    #     dest: /etc/cob2.cfg
+    #     state: link
+
+    # - name: Add IBM COBOL paths to PATH environment variable
+    #   lineinfile:
+    #     path: /home/adminuser/.bashrc
+    #     line: 'export PATH=$PATH:/opt/ibm/cobol/1.2.0/bin:/opt/ibm/cobol/rte/bin:/opt/ibm/cobol/debug/usr/bin'
+    #     state: present
+
+    # - name: Source .bashrc to update PATH environment variable
+    #   shell: source /home/adminuser/.bashrc
+
+    - name: Download DB2 Community Edition installation files
+      copy:
+        src: /Users/rajrajar/vault/mainframe/v11.5.9_linuxx64_server_dec.tar.gz
+        dest: /tmp/db2_installation_files.tar.gz
+
+    - name: Extract DB2 installation files
+      unarchive:
+        src: /tmp/db2_installation_files.tar.gz
+        dest: /tmp
+        remote_src: yes
+
+    - name: Run DB2 installation script
+      command:
+        cmd: /tmp/db2_installation_files/install.sh
+        creates: /path/to/installed/db2
