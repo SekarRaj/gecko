@@ -3,17 +3,20 @@
   <head>
     <link rel="stylesheet" href="index.css">
   </head>
+
 <body>
 
-<h2>Item Form</h2>
+
 
 <form hx-post="/submit" hx-swap="outerHTML">
+
+  <h2 class="centered">Item Form</h2>
   <fieldset>
     <legend>Item Description:</legend>
     <label for="description">Description:</label><br>
     <textarea id="description" name="description"></textarea><br>
-    <label for="img">Upload Image:</label>
-    <input type="file" id="img" name="img" accept="image/*"><br>
+    <!-- <label for="img">Upload Image:</label>
+    <input type="file" id="img" name="img" accept="image/*"><br> -->
   </fieldset>
   
   <fieldset>
@@ -31,23 +34,22 @@
     <input type="text" id="shortName" name="shortName"><br>
   </fieldset>
 
-  <fieldset>
+  <!-- <fieldset>
     <legend>HACCP:</legend>
     <input type="checkbox" id="haccp" name="haccp">
     <label for="haccp">HACCP Required</label><br>
-  </fieldset>
-
+  </fieldset> -->
+<!-- 
   <fieldset>
     <legend>Order Qty Calculation:</legend>
-    <!-- Add more input fields as per requirements -->
+
   </fieldset>
 
   <fieldset>
     <legend>Categories:</legend>
-    <!-- Add more input fields as per requirements -->
-  </fieldset>
+  </fieldset> -->
 
-  <fieldset>
+  <!-- <fieldset>
     <legend>Nutrients:</legend>
     <label for="calcMethod">Nutrient Calculation Method:</label><br>
     <select id="calcMethod" name="calcMethod">
@@ -56,13 +58,11 @@
       <option value="catalog">Nutrient Catalog</option>
       <option value="nonconsumable">Nonconsumable</option>
     </select><br>
-    <!-- Add more input fields as per requirements -->
-  </fieldset>
+  </fieldset> -->
 
-  <fieldset>
+  <!-- <fieldset>
     <legend>Other Settings:</legend>
-    <!-- Add more input fields as per requirements -->
-  </fieldset>
+  </fieldset> -->
 
   <input type="submit" value="Save">
 </form>

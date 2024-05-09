@@ -67,6 +67,7 @@ resource "azurerm_linux_virtual_machine" "ibm-vm" {
     storage_account_type = "Standard_LRS"
   }
 
+
   source_image_reference {
       publisher = "Canonical"
       offer     = "0001-com-ubuntu-confidential-vm-focal"
@@ -86,15 +87,33 @@ resource "azurerm_managed_disk" "ibm-managed-disk" {
 
 resource "azurerm_virtual_machine_data_disk_attachment" "example" {
   managed_disk_id    = azurerm_managed_disk.ibm-managed-disk.id
-  virtual_machine_id = azurerm_virtual_machine.ibm-vm.id
+  virtual_machine_id = azurerm_linux_virtual_machine.ibm-vm.id
   lun                = "10"
   caching            = "ReadWrite"
 }
 
-resource "local_file" "ansible_inventory" {
-  content  = azurerm_public_ip.ibm_ip.ip_address
-  filename = "${path.module}/inventory.ini"
-  depends_on = [azurerm_linux_virtual_machine.ibm-vm]
+# resource "local_file" "ansible_inventory" {
+#   content  = azurerm_public_ip.ibm_ip.ip_address
+#   filename = "${path.module}/inventory.ini"
+#   depends_on = [azurerm_linux_virtual_machine.ibm-vm]
+# }
+
+resource "azurerm_storage_account" "ibm_sa" {
+  name                     = "${var.prefix}storageaccount88"
+  resource_group_name      = azurerm_resource_group.ibm-rg.name
+  location                 = azurerm_resource_group.ibm-rg.location
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+
+  tags = {
+    environment = "poc"
+  }
+}
+
+resource "azurerm_storage_share" "ibm_share" {
+  name                 = "ibmfileshare"
+  storage_account_name = azurerm_storage_account.ibm_sa.name
+  quota                = 50
 }
 
 output "public_ip" {
